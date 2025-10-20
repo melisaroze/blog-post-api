@@ -44,28 +44,34 @@ module.exports.getPostById = (req, res) => {
 }; 
 
 module.exports.updatePost = (req, res) => {
+  const { title, content } = req.body;
+  const postId = req.params.postId;
 
-  const updatedPost = {
-    title: req.body.title,
-    content: req.body.content,
-  };
-
-  Post.findByIdAndUpdate(req.params.postId, updatedPost)
-    .then(updated => {
-      if (!updated) {
+  Post.findById(postId)
+    .then(post => {
+      if (!post) {
         return res.status(404).send({ error: 'Blog post not found' });
       }
 
-      res.status(200).send({
-        message: 'Blog post updated successfully',
-        updatedPost: updated
-      });
+      if (post.author.toString() !== req.user.id && !req.user.isAdmin) {
+        return res.status(403).send({ error: 'Unauthorized to update this post' });
+      }
+
+      post.title = title;
+      post.content = content;
+
+      return post.save();
     })
+    .then(updated => res.status(200).send({
+      message: 'Blog post updated successfully',
+      updatedPost: updated
+    }))
     .catch(err => {
       console.error("Error in updating blog post:", err);
       res.status(500).send({ error: 'Error in updating blog post.' });
     });
 };
+
 
 module.exports.deletePost = (req, res) => {
 
