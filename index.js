@@ -13,7 +13,8 @@ app.use(cors({
   origin: [
     "http://localhost:3000",             
     "http://localhost:4000",             
-    "https://blog-post-api-alvarez.onrender.com"  
+    "https://blog-post-api-alvarez.onrender.com" ,
+    "https://blog-post-client-alvarez.vercel.app" 
   ],
   methods: ["GET", "POST", "PATCH", "DELETE"],
   credentials: true
