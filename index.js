@@ -20,6 +20,8 @@ const corsOptions = {
     "https://blog-post-client-alvarez.vercel.app" 
     ],
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     optionsSuccessStatus: 200
 };
 
