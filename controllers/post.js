@@ -22,7 +22,9 @@ module.exports.addPost = (req, res) => {
 
 module.exports.getPosts = (req, res) => {
 
-	return Post.find({}).then(posts => {
+	return Post.find({})
+    .populate('author', 'userName')
+    .then(posts => {
 		return res.status(200).send({ posts });
 	}).catch(findErr => {
 	    console.error("Error in finding blog posts: ", findErr)
@@ -34,7 +36,9 @@ module.exports.getPosts = (req, res) => {
 
 module.exports.getPostById = (req, res) => {
 
-	return Post.findById(req.params.postId).then(post => {
+	return Post.findById(req.params.postId)
+    .populate('author', 'userName')
+    .then(post => {
 		return res.status(200).send(post);
 	}).catch(findErr => {
 	    console.error("Error in finding blog posts: ", findErr)
