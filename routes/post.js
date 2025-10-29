@@ -8,9 +8,9 @@ const router = express.Router();
 
 router.post("/addPost", verify, postController.addPost);
 
-router.get("/getPosts",  verify, postController.getPosts);
+router.get("/getPosts", postController.getPosts);
 
-router.get("/getPost/:postId", verify, postController.getPostById);
+router.get("/getPost/:postId", postController.getPostById);
 
 router.patch("/updatePost/:postId", verify, verifyOwnerOrAdmin, postController.updatePost);
 
