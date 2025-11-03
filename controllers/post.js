@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+const User = require("../models/User");
 const Post = require("../models/Post");
 
 module.exports.addPost = (req, res) => {
@@ -175,4 +177,35 @@ module.exports.deleteComment = (req, res) => {
             console.error("Error deleting comment:", err);
             return res.status(500).send({ error: 'Error deleting comment' });
         });
+};
+
+module.exports.postCounts = async (req, res) => {
+    try {
+        const users = await User.aggregate([
+            { $match: { isAdmin: false } }, 
+            {
+                $lookup: {
+                    from: 'posts',
+                    localField: '_id',
+                    foreignField: 'author',
+                    as: 'userPosts'
+                }
+            },
+            {
+                $project: {
+                    userName: 1,
+                    postCount: { $size: '$userPosts' } 
+                }
+            }
+        ]);
+
+        if (!users || users.length === 0) {
+            return res.status(404).send({ error: 'No non-admin users found' });
+        }
+
+        return res.status(200).send({ users });
+    } catch (err) {
+        console.error('Error fetching users with post counts:', err);
+        return res.status(500).send({ error: 'Failed to fetch users with post counts' });
+    }
 };

@@ -10,6 +10,8 @@ router.post("/addPost", verify, postController.addPost);
 
 router.get("/getPosts", postController.getPosts);
 
+router.get("/postCounts", postController.postCounts);
+
 router.get("/getPost/:postId", postController.getPostById);
 
 router.patch("/updatePost/:postId", verify, verifyOwnerOrAdmin, postController.updatePost);
