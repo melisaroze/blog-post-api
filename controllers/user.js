@@ -106,9 +106,8 @@ module.exports.getAllUsers = (req, res) => {
 
 module.exports.postCounts = async (req, res) => {
 	try {
-		// Aggregate non-admin users with post counts
 		const users = await User.aggregate([
-			{ $match: { isAdmin: false } }, // Only non-admin users
+			{ $match: { isAdmin: false } }, 
 			{
 				$lookup: {
 					from: 'posts',
