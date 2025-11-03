@@ -86,3 +86,52 @@ module.exports.getProfile = (req, res) => {
 	});
 
 };
+
+module.exports.getAllUsers = (req, res) => {
+
+	return User.find({ isAdmin: false }, 'userName')
+	.then(users => {
+	    if (!users || users.lenth === 0 ) {
+	        return res.status(404).send({ error: 'No users found' });
+	    }
+
+	    return res.status(200).send({ users });
+	})
+	.catch(err => {
+		console.error("Error in fetching usernames", err)
+		return res.status(500).send({ error: 'Failed to fetch usernames' })
+	});
+
+};
+
+module.exports.postCounts = async (req, res) => {
+	try {
+		// Aggregate non-admin users with post counts
+		const users = await User.aggregate([
+			{ $match: { isAdmin: false } }, // Only non-admin users
+			{
+				$lookup: {
+					from: 'posts',
+					localField: '_id',
+					foreignField: 'author',
+					as: 'userPosts'
+				}
+			},
+			{
+				$project: {
+					userName: 1,
+					postCount: { $size: '$userPosts' } 
+				}
+			}
+		]);
+
+		if (!users || users.length === 0) {
+			return res.status(404).send({ error: 'No non-admin users found' });
+		}
+
+		return res.status(200).send({ users });
+	} catch (err) {
+		console.error('Error fetching users with post counts:', err);
+		return res.status(500).send({ error: 'Failed to fetch users with post counts' });
+	}
+};

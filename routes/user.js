@@ -12,4 +12,8 @@ router.post("/login", userController.loginUser);
 
 router.get("/details", verify, userController.getProfile);
 
+router.get("/all", userController.getAllUsers);
+
+router.get("/postCounts", userController.postCounts);
+
 module.exports = router;
