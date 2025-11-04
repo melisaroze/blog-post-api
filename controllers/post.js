@@ -49,6 +49,32 @@ module.exports.getPostById = (req, res) => {
 	});
 }; 
 
+
+
+module.exports.postKeyword = (req, res) => {
+  const keyword = req.query.keyword ? req.query.keyword.trim() : "";
+
+  // Create a search filter
+  const filter = keyword
+    ? {
+        $or: [
+          { title: { $regex: keyword, $options: "i" } }, // Case-insensitive
+          { content: { $regex: keyword, $options: "i" } },
+        ],
+      }
+    : {};
+
+  Post.find(filter)
+    .populate("author", "userName")
+    .then((posts) => {
+      return res.status(200).send({ posts });
+    })
+    .catch((findErr) => {
+      console.error("Error in finding blog posts: ", findErr);
+      return res.status(500).send({ message: "Error finding blog posts" });
+    });
+};
+
 module.exports.updatePost = (req, res) => {
   const { title, content } = req.body;
   const postId = req.params.postId;

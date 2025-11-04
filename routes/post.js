@@ -14,6 +14,8 @@ router.get("/postCounts", postController.postCounts);
 
 router.get("/getPost/:postId", postController.getPostById);
 
+router.get("/postKeyword", postController.postKeyword);
+
 router.patch("/updatePost/:postId", verify, verifyOwnerOrAdmin, postController.updatePost);
 
 router.delete("/deletePost/:postId", verify, verifyOwnerOrAdmin, postController.deletePost);
