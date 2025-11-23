@@ -1,14 +1,15 @@
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const express = require("express");
 const multer = require("multer");
-const cloudinary = require("../config/cloudinary");
+const storage = require("../config/cloudinaryStorage");
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: { folder: "blog_images" },
-});
-
+const router = express.Router();
 const upload = multer({ storage });
 
 router.post("/image", upload.single("image"), (req, res) => {
-  res.json({ imageUrl: req.file.path });
+  res.json({
+    success: true,
+    imageUrl: req.file.path, // this is the Cloudinary URL
+  });
 });
+
+module.exports = router;
