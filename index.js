@@ -36,9 +36,11 @@ mongoose.connection.once('open', () => console.log('Now connected to MongoDB Atl
 //Routes Middleware
 const postRoutes = require("./routes/post");
 const userRoutes = require("./routes/user");
+const uploadRoutes = require("./routes/uploadRoutes");
 
 app.use("/posts", postRoutes);
 app.use("/users", userRoutes);
+app.use("/upload", uploadRoutes);
 
 if(require.main === module){
     app.listen(process.env.PORT || port, () => {
