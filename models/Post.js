@@ -9,6 +9,9 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Content is Required']
     },
+    image: {
+        type: String
+    },
     author: {
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User',

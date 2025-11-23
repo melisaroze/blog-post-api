@@ -8,6 +8,7 @@ module.exports.addPost = (req, res) => {
 	let newPost = new Post({
 		title: req.body.title,
 		content: req.body.content,
+        image: req.body.image,
 		author: req.user.id
 	});
 
