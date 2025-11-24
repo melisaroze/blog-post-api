@@ -37,6 +37,22 @@ module.exports.getPosts = (req, res) => {
 }; 
 
 
+module.exports.getMyPosts = (req, res) => {
+    const userId = req.user.id;
+
+    return Post.find({author: userId})
+    .populate('author', 'userName')
+    .then(posts => {
+        return res.status(200).send({ posts });
+    }).catch(findErr => {
+        console.error("Error in finding blog posts: ", findErr)
+
+        return res.status(500).send({ message:'Error finding blog posts' });
+    });
+}; 
+
+
+
 module.exports.getPostById = (req, res) => {
 
 	return Post.findById(req.params.postId)
