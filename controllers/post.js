@@ -198,7 +198,7 @@ module.exports.editComment = (req, res) => {
   const { postId, commentId } = req.params;
   const { comment } = req.body;
 
-  return Post.findById(postId)
+  return Post.findById(postId).populate("comments.user", "userName")
     .then(post => {
       if (!post) {
         return res.status(404).send({ error: "Blog post not found" });
