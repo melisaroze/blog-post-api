@@ -193,33 +193,80 @@ module.exports.getComments = (req, res) => {
 	})
 };
 
-module.exports.deleteComment = (req, res) => {
-    const { postId} = req.params;
-    const { commentId} = req.body;
 
-    return Post.findById(postId)
-        .then(post => {
-            if (![post]) {
-                return res.status(404).send({ error: 'Blog post not found' });
-            }
+module.exports.editComment = (req, res) => {
+  const { postId, commentId } = req.params;
+  const { comment } = req.body;
 
-            const commentIndex = post.comments.findIndex(
-                comment => comment._id.toString() === commentId
-            );
+  return Post.findById(postId)
+    .then(post => {
+      if (!post) {
+        return res.status(404).send({ error: "Blog post not found" });
+      }
 
-            if (commentIndex === -1) {
-                return res.status(404).send({ error: 'Comment not found' });
-            }
+      const targetComment = post.comments.id(commentId);
 
-            post.comments.splice(commentIndex, 1);
+      if (!targetComment) {
+        return res.status(404).send({ error: "Comment not found" });
+      }
 
-            return post.save()
-                .then(() => res.status(200).send({ message: 'Comment deleted successfully' }));
+      // ✅ PERMISSION
+      if (
+        targetComment.user.toString() !== req.user.id &&
+        !req.user.isAdmin
+      ) {
+        return res.status(403).send({ error: "Unauthorized" });
+      }
+
+      targetComment.comment = comment;
+
+      return post.save().then(updatedPost =>
+        res.status(200).send({
+          message: "Comment updated successfully",
+          updatedPost
         })
-        .catch(err => {
-            console.error("Error deleting comment:", err);
-            return res.status(500).send({ error: 'Error deleting comment' });
-        });
+      );
+    })
+    .catch(err => {
+      console.error(err);
+      return res.status(500).send({ error: "Error editing comment" });
+    });
+};
+
+module.exports.deleteComment = (req, res) => {
+  const { postId, commentId } = req.params;
+
+  return Post.findById(postId)
+    .then(post => {
+      if (!post) {
+        return res.status(404).send({ error: "Post not found" });
+      }
+
+      const comment = post.comments.id(commentId);
+
+      if (!comment) {
+        return res.status(404).send({ error: "Comment not found" });
+      }
+
+      // ✅ PERMISSION CHECK
+      if (
+        comment.user.toString() !== req.user.id &&
+        !req.user.isAdmin
+      ) {
+        return res.status(403).send({ error: "Unauthorized" });
+      }
+
+      // ✅ DELETE
+      comment.deleteOne();
+
+      return post.save().then(() =>
+        res.status(200).send({ message: "Comment deleted" })
+      );
+    })
+    .catch(err => {
+      console.error(err);
+      res.status(500).send({ error: "Server error" });
+    });
 };
 
 module.exports.postCounts = async (req, res) => {
@@ -252,37 +299,6 @@ module.exports.postCounts = async (req, res) => {
         return res.status(500).send({ error: 'Failed to fetch users with post counts' });
     }
 };
-
-// module.exports.likePost = async (req, res) => {
-//     try {
-//         const users = await User.aggregate([
-//             { $match: { isAdmin: false } }, 
-//             {
-//                 $lookup: {
-//                     from: 'posts',
-//                     localField: '_id',
-//                     foreignField: 'author',
-//                     as: 'userPosts'
-//                 }
-//             },
-//             {
-//                 $project: {
-//                     userName: 1,
-//                     postCount: { $size: '$userPosts' } 
-//                 }
-//             }
-//         ]);
-
-//         if (!users || users.length === 0) {
-//             return res.status(404).send({ error: 'No non-admin users found' });
-//         }
-
-//         return res.status(200).send({ users });
-//     } catch (err) {
-//         console.error('Error fetching users with post counts:', err);
-//         return res.status(500).send({ error: 'Failed to fetch users with post counts' });
-//     }
-// };
 
 
 module.exports.likePost = async (req, res) => {
