@@ -288,9 +288,9 @@ module.exports.postCounts = async (req, res) => {
 module.exports.likePost = async (req, res) => {
   try {
     const userId = req.user.id;
-    const postId = req.params.id;
+    const postId = req.params;
 
-    const post = await Post.findById(postId);
+    const post = await Post.findById(req.params.postId);
 
     if (!post) {
       return res.status(404).send({ message: "Post not found" });
