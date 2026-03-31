@@ -70,7 +70,7 @@ module.exports.getMyPosts = (req, res) => {
 
 
 module.exports.getPostById = (req, res) => {
-  return getPopulatedPost(req.params.postId)
+  return Post.findById(req.params.postId)
     .then(post => res.status(200).send(post))
     .catch(err => {
       console.error(err);
