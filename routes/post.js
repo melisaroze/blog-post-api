@@ -22,6 +22,8 @@ router.patch("/updatePost/:postId", verify, verifyOwnerOrAdmin, postController.u
 
 router.delete("/deletePost/:postId", verify, verifyOwnerOrAdmin, postController.deletePost);
 
+router.patch("/likePost/:postId", verify, postController.likePost);
+
 router.patch("/addComment/:postId", verify, postController.addComment);
 
 router.get("/getComments/:postId", verify, postController.getComments);

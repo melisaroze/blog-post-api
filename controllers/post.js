@@ -252,3 +252,71 @@ module.exports.postCounts = async (req, res) => {
         return res.status(500).send({ error: 'Failed to fetch users with post counts' });
     }
 };
+
+module.exports.likePost = async (req, res) => {
+    try {
+        const users = await User.aggregate([
+            { $match: { isAdmin: false } }, 
+            {
+                $lookup: {
+                    from: 'posts',
+                    localField: '_id',
+                    foreignField: 'author',
+                    as: 'userPosts'
+                }
+            },
+            {
+                $project: {
+                    userName: 1,
+                    postCount: { $size: '$userPosts' } 
+                }
+            }
+        ]);
+
+        if (!users || users.length === 0) {
+            return res.status(404).send({ error: 'No non-admin users found' });
+        }
+
+        return res.status(200).send({ users });
+    } catch (err) {
+        console.error('Error fetching users with post counts:', err);
+        return res.status(500).send({ error: 'Failed to fetch users with post counts' });
+    }
+};
+
+
+module.exports.likePost = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const postId = req.params.id;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).send({ message: "Post not found" });
+    }
+
+    const alreadyLiked = post.likes.includes(userId);
+
+    if (alreadyLiked) {
+      // ❌ Unlike
+      post.likes = post.likes.filter(
+        (id) => id.toString() !== userId
+      );
+    } else {
+      // ❤️ Like
+      post.likes.push(userId);
+    }
+
+    await post.save();
+
+    return res.status(200).send({
+      message: alreadyLiked ? "Post unliked" : "Post liked",
+      likes: post.likes.length
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send({ message: "Error liking post" });
+  }
+};
