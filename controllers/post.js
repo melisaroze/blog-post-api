@@ -25,7 +25,7 @@ module.exports.addPost = (req, res) => {
 
 module.exports.getPosts = (req, res) => {
 
-	return Post.find({postId})
+	return Post.find({})
     .populate('author', 'userName')
     .populate('comments.user', 'userName')
     .then(posts => {
