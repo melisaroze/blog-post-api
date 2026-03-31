@@ -162,39 +162,43 @@ module.exports.deletePost = (req, res) => {
         });
 };
 
-module.exports.addComment = (req, res) => {
 
-	if(req.user.isAdmin){
-    	return res.send("Action Forbidden")
-  	}
+module.exports.addComment = async (req, res) => {
+  if (req.user.isAdmin) {
+    return res.status(403).send("Action Forbidden");
+  }
 
-	return Post.findById(req.params.postId).then(post => {
+  try {
+    const post = await Post.findById(req.params.postId);
 
-    	let userComment = {
-    		user: req.user.id,
-            userName: req.user.userName,
-        	comment: req.body.comment
-    	}
+    if (!post) {
+      return res.status(404).send({ error: 'Blog Post not found' });
+    }
 
-	    post.comments.push(userComment);
-	    
-	    return post.save()
-	    .then(updatedPost => {
-	        if (!updatedPost) {
-	            return res.status(404).send({ error: 'Blog Post not found' });
-	        }
+    const userComment = {
+      user: req.user.id,
+      userName: req.user.userName,
+      comment: req.body.comment
+    };
 
-	        return res.status(200).send({ 
-	        	message: 'comment added successfully', 
-	        	updatedPost: updatedPost 
-	        });
+    post.comments.push(userComment);
 
-	    })
-	    .catch(err => {
-			console.error("Error in updating a blog post: ", err)
-			return res.status(500).send({ error: 'Error in updating a blog post.' });
-		});
-	})
+    let updatedPost = await post.save();
+
+    // ✅ MAKE DATA CONSISTENT
+    updatedPost = await Post.findById(updatedPost._id)
+      .populate('author', 'userName')
+      .populate('comments.user', 'userName');
+
+    return res.status(200).send({
+      message: 'Comment added successfully',
+      updatedPost
+    });
+
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send({ error: 'Error adding comment' });
+  }
 };
 
 
