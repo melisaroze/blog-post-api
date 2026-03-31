@@ -27,6 +27,7 @@ module.exports.getPosts = (req, res) => {
 
 	return Post.find({})
     .populate('author', 'userName')
+    .populate('comments.user', 'userName')
     .then(posts => {
 		return res.status(200).send({ posts });
 	}).catch(findErr => {
@@ -53,19 +54,29 @@ module.exports.getMyPosts = (req, res) => {
 
 
 
+// module.exports.getPostById = (req, res) => {
+
+// 	return Post.findById(req.params.postId)
+//     .populate('author', 'userName')
+//     .populate('comments.user', 'userName')
+//     .then(post => {
+// 		return res.status(200).send(post);
+// 	}).catch(findErr => {
+// 	    console.error("Error in finding blog posts: ", findErr)
+
+// 	    return res.status(500).send({ message:'Error finding blog posts' });
+// 	});
+// }; 
+
+
 module.exports.getPostById = (req, res) => {
-
-	return Post.findById(req.params.postId)
-    .populate('author', 'userName')
-    .populate('comments.user', 'userName')
-    .then(post => {
-		return res.status(200).send(post);
-	}).catch(findErr => {
-	    console.error("Error in finding blog posts: ", findErr)
-
-	    return res.status(500).send({ message:'Error finding blog posts' });
-	});
-}; 
+  return getPopulatedPost(req.params.postId)
+    .then(post => res.status(200).send(post))
+    .catch(err => {
+      console.error(err);
+      res.status(500).send({ message: "Error finding post" });
+    });
+};
 
 
 
