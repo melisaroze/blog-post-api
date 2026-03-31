@@ -57,6 +57,7 @@ module.exports.getPostById = (req, res) => {
 
 	return Post.findById(req.params.postId)
     .populate('author', 'userName')
+    .populate('comments.user', 'userName')
     .then(post => {
 		return res.status(200).send(post);
 	}).catch(findErr => {
